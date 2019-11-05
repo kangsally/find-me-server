@@ -27,6 +27,7 @@ router.post('/join', async (req, res) => {
 
 router.post('/login', (req, res) => {
   const { id, password } = req.body;
+  console.log(id, password)
   User.findOne({ id }, (err, user) => {
     if (err) {
       res.status(500).json({
@@ -49,7 +50,7 @@ router.post('/login', (req, res) => {
         } else {
           const payload = { id };
           const token = jwt.sign(payload, process.env.SECRETKEY, {
-            expiresIn: '1h'
+            expiresIn: '5m'
           });
           res
             .cookie('token', token, { httpOnly: true })
@@ -64,7 +65,7 @@ router.post('/login', (req, res) => {
 });
 
 router.get('/checkToken', withAuth, (req, res) => {
-  res.status(200);
+  res.sendStatus(200);
 });
 
 module.exports = router;
