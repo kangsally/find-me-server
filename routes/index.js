@@ -56,7 +56,8 @@ router.post('/login', (req, res) => {
             .cookie('token', token, { httpOnly: true })
             .status(200)
             .json({
-              id: id
+              id: user.id,
+              point: user.point 
             });
         }
       });

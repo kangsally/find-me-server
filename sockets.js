@@ -17,7 +17,7 @@ module.exports = server => {
     };
     users[socket.id] = socket;
     userWaitingList.push(user);
-    console.log(userWaitingList);
+    // console.log(userWaitingList);
 
     socket.on('userInfo', info => {
       user.id = info.id;
@@ -26,12 +26,14 @@ module.exports = server => {
     socket.on('userLocation', loaction => {
       user.lon = loaction.lon;
       user.lat = loaction.lat;
-      console.log(user);
+      // console.log(user);
 
-      if (userWaitingList.indexOf(user) !== -1) {
+      if (userWaitingList.indexOf(user) !== -1 && user.id) {
         const partner = userWaitingList.find(partner => {
           return (
-            getDistance(user.lat, user.lon, partner.lat, partner.lon) < 0.5
+            getDistance(user.lat, user.lon, partner.lat, partner.lon) < 0.5 &&
+            user !== partner &&
+            partner.id
           );
         });
 
@@ -47,7 +49,7 @@ module.exports = server => {
           roomList[socket.id] = roomId;
           roomList[partner.socketId] = roomId;
 
-          console.log(socket.adapter);
+          // console.log(socket.adapter);
 
           io.sockets.in(roomId).emit('start', {
             hide: user.id,
@@ -79,9 +81,7 @@ module.exports = server => {
     });
 
     socket.on('end', data => {
-
-        socket.leave(roomList[socket.id])
-    })
-
+      socket.leave(roomList[socket.id]);
+    });
   });
 };
