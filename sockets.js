@@ -17,7 +17,6 @@ module.exports = server => {
     };
     users[socket.id] = socket;
     userWaitingList.push(user);
-    // console.log(userWaitingList);
 
     socket.on('userInfo', info => {
       user.id = info.id;
@@ -26,7 +25,6 @@ module.exports = server => {
     socket.on('userLocation', loaction => {
       user.lon = loaction.lon;
       user.lat = loaction.lat;
-      // console.log(user);
 
       if (userWaitingList.indexOf(user) !== -1 && user.id) {
         const partner = userWaitingList.find(partner => {
@@ -49,8 +47,6 @@ module.exports = server => {
           roomList[socket.id] = roomId;
           roomList[partner.socketId] = roomId;
 
-          // console.log(socket.adapter);
-
           io.sockets.in(roomId).emit('start', {
             hide: user.id,
             seek: partner.id
@@ -60,10 +56,9 @@ module.exports = server => {
     });
 
     //photo, location
-    //location에 timestamp 정보 추가
     socket.on('hideData', data => {
       socket.broadcast.to(roomList[socket.id]).emit('hideData', {
-        data: data
+        photo: data.photo
       });
     });
 
@@ -73,6 +68,13 @@ module.exports = server => {
         data: data
       });
     });
+
+    socket.on('start', data => {
+      const startTime = new Date();
+      io.sockets.in(roomList[socket.id]).emit('start', {
+        data: startTime
+      })
+    })
 
     socket.on('message', data => {
       socket.broadcast.to(roomList[socket.id]).emit('message', {
