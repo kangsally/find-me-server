@@ -12,7 +12,7 @@ module.exports = server => {
     const user = {
       socketId: socket.id,
       id: null,
-      lon: null,
+      lng: null,
       lat: null
     };
     users[socket.id] = socket;
@@ -23,13 +23,13 @@ module.exports = server => {
     });
 
     socket.on('userLocation', loaction => {
-      user.lon = loaction.lon;
+      user.lng = loaction.lng;
       user.lat = loaction.lat;
 
       if (userWaitingList.indexOf(user) !== -1 && user.id) {
         const partner = userWaitingList.find(partner => {
           return (
-            getDistance(user.lat, user.lon, partner.lat, partner.lon) < 0.5 &&
+            getDistance(user.lat, user.lng, partner.lat, partner.lng) < 0.5 &&
             user !== partner &&
             partner.id
           );
@@ -58,21 +58,23 @@ module.exports = server => {
     //photo, location
     socket.on('hideData', data => {
       socket.broadcast.to(roomList[socket.id]).emit('hideData', {
-        photo: data.photo
+        photo: data.photo,
+        location: data.location
       });
     });
 
     //real location
     socket.on('seekData', data => {
+      console.log(data);
       socket.broadcast.to(roomList[socket.id]).emit('seekData', {
-        data: data
+        location: data
       });
     });
 
-    socket.on('start', data => {
-      const startTime = new Date();
-      io.sockets.in(roomList[socket.id]).emit('start', {
-        data: startTime
+    socket.on('notice', data => {
+      const endTime = new Date().getTime() + 10*60000;
+      io.sockets.in(roomList[socket.id]).emit('notice', {
+        time: endTime
       })
     })
 
@@ -84,6 +86,8 @@ module.exports = server => {
 
     socket.on('end', data => {
       socket.leave(roomList[socket.id]);
+      delete users[socket.id];
+      delete roomList[socket.id];
     });
   });
 };
