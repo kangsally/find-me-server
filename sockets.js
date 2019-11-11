@@ -65,7 +65,7 @@ module.exports = server => {
 
     //real location
     socket.on('seekData', data => {
-      console.log(data);
+      // console.log(data);
       socket.broadcast.to(roomList[socket.id]).emit('seekData', {
         location: data
       });
@@ -80,7 +80,7 @@ module.exports = server => {
 
     socket.on('message', data => {
       socket.broadcast.to(roomList[socket.id]).emit('message', {
-        data: data
+        message: data.message
       });
     });
 
