@@ -5,9 +5,11 @@ module.exports = server => {
   const io = require('socket.io')(server);
   io.set('heartbeat interval', 100000);
   io.set('heartbeat timeout', 100000);
+
   const users = {};
   const userWaitingList = [];
   const roomList = {};
+
   io.on('connection', socket => {
     const user = {
       socketId: socket.id,
@@ -17,11 +19,9 @@ module.exports = server => {
     };
     users[socket.id] = socket;
     userWaitingList.push(user);
-
     socket.on('userInfo', info => {
       user.id = info.id;
     });
-
     socket.on('userLocation', loaction => {
       user.lng = loaction.lng;
       user.lat = loaction.lat;
@@ -29,7 +29,7 @@ module.exports = server => {
       if (userWaitingList.indexOf(user) !== -1 && user.id) {
         const partner = userWaitingList.find(partner => {
           return (
-            getDistance(user.lat, user.lng, partner.lat, partner.lng) < 0.5 &&
+            getDistance(user.lat, user.lng, partner.lat, partner.lng) < 500 &&
             user !== partner &&
             partner.id
           );
@@ -55,7 +55,6 @@ module.exports = server => {
       }
     });
 
-    //photo, location
     socket.on('hideData', data => {
       socket.broadcast.to(roomList[socket.id]).emit('hideData', {
         photo: data.photo,
@@ -63,20 +62,18 @@ module.exports = server => {
       });
     });
 
-    //real location
     socket.on('seekData', data => {
-      // console.log(data);
       socket.broadcast.to(roomList[socket.id]).emit('seekData', {
         location: data
       });
     });
 
     socket.on('notice', data => {
-      const endTime = new Date().getTime() + 10*60000;
+      const endTime = new Date().getTime() + 10 * 60000;
       io.sockets.in(roomList[socket.id]).emit('notice', {
         time: endTime
-      })
-    })
+      });
+    });
 
     socket.on('message', data => {
       socket.broadcast.to(roomList[socket.id]).emit('message', {
@@ -84,10 +81,70 @@ module.exports = server => {
       });
     });
 
-    socket.on('end', data => {
+    socket.on('seekFinish', ({ result, finishMessage }) => {
+      if (result === 'success') {
+        io.sockets.in(roomList[socket.id]).emit('seekFinish', {
+          result: 'success',
+          finishMessage: finishMessage
+        });
+      }
+      if (result === 'timeover') {
+        io.sockets.in(roomList[socket.id]).emit('seekFinish', {
+          result: 'timeover',
+          finishMessage: finishMessage
+        });
+      }
+      if (result === 'giveup') {
+        io.sockets.in(roomList[socket.id]).emit('seekFinish', {
+          result: 'giveup',
+          finishMessage: finishMessage
+        });
+      }
       socket.leave(roomList[socket.id]);
-      delete users[socket.id];
       delete roomList[socket.id];
+    });
+
+    socket.on('hideFinish', ({ result, finishMessage }) => {
+      if (result === 'noPhoto') {
+        io.sockets.in(roomList[socket.id]).emit('hideFinish', {
+          result: 'noPhoto',
+          finishMessage: finishMessage
+        });
+      }
+      socket.leave(roomList[socket.id]);
+      delete roomList[socket.id];
+    });
+
+    socket.on('end', () => {
+      if (!socket.adapter.rooms[roomList[socket.id]]) {
+        return;
+      }
+      socket.leave(roomList[socket.id]);
+      delete roomList[socket.id];
+    });
+
+    socket.on('disconnect', () => {
+      if (!socket.adapter.rooms[roomList[socket.id]]) {
+        return;
+      }
+      if (socket.adapter.rooms[roomList[socket.id]]) {
+        socket.leave(roomList[socket.id]);
+        socket.broadcast.to(roomList[socket.id]).emit('disconnected', {
+          result: 'disconnected',
+          finishMessage: '상대방의 연결이 끊겼습니다.'
+        });
+        delete roomList[socket.id];
+      }
+
+      userWaitingList.splice(
+        userWaitingList.indexOf(
+          userWaitingList.find(user => {
+            return user.socketId === socket.id;
+          })
+        ),
+        1
+      );
+      delete users[socket.id];
     });
   });
 };

@@ -1,10 +1,17 @@
-exports.getDistance = (myLat, myLng, partnerLat, partnerLng) => {
-  const earthRadius = 6371;
-  const distance =
-    Math.acos(
-      Math.sin(myLat) * Math.sin(partnerLat) +
-        Math.cos(myLat) * Math.cos(partnerLat) * Math.cos(myLng - partnerLng)
-    ) * earthRadius;
-
-  return distance;
+exports.getDistance = (lat1, lng1, lat2, lng2) => {
+  const deg2rad = deg => {
+    return deg * (Math.PI / 180);
+  };
+  const r = 6371;
+  const dLat = deg2rad(lat2 - lat1);
+  const dLon = deg2rad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(deg2rad(lat1)) *
+      Math.cos(deg2rad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const d = r * c;
+  return Math.round(d * 1000);
 };

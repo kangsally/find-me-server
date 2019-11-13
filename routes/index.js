@@ -68,7 +68,7 @@ router.post('/login', (req, res) => {
 
 router.post('/location', async (req, res) => {
   const { lat, lng } = req.body;
-  const locationCategory = ['CE7', 'BK9', 'CS2'];
+  const locationCategory = ['FD6', 'BK9', 'CS2'];
   const places = await Promise.all(
     locationCategory.map(async category =>
       getFacilityLocation(lng, lat, category)

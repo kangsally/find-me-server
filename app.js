@@ -2,15 +2,10 @@ require('dotenv').config();
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
-// const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-// const logger = require('morgan');
 const bodyParser = require('body-parser');
-
 const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
-// const withAuth = require('./middleware');
 
 const app = express();
 
@@ -21,8 +16,6 @@ app.use(cors({
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-
-// app.use(logger('dev'));
 
 const mongoose = require('mongoose');
 mongoose.connect(process.env.DATABASE_URL, {
@@ -41,7 +34,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
 
 app.use(function(req, res, next) {
   next(createError(404));
