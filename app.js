@@ -14,7 +14,7 @@ app.set('view engine', 'ejs');
 
 app.use(cors({
   credentials: true,
-  origin: 'http://localhost:3000'
+  origin: 'https://awesome-kirch-9a9026.netlify.com'
 }));
 
 app.use(bodyParser.json());
