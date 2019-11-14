@@ -14,7 +14,7 @@ app.set('view engine', 'ejs');
 
 app.use(cors({
   credentials: true,
-  origin: 'https://awesome-kirch-9a9026.netlify.com'
+  origin: 'https://www.find-me.website'
 }));
 
 app.use(bodyParser.json());
