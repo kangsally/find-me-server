@@ -5,6 +5,10 @@ const jwt = require('jsonwebtoken');
 const withAuth = require('../middleware');
 const { getFacilityLocation } = require('../api');
 
+router.get('/', (req, res, next) => {
+  res.render('index', { title: 'find-me-server' });
+});
+
 router.post('/join', async (req, res) => {
   const { id, password } = req.body;
   const point = 10000;
