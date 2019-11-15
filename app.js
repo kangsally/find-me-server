@@ -14,7 +14,7 @@ app.set('view engine', 'ejs');
 
 app.use(cors({
   credentials: true,
-  origin: 'https://find-me.website'
+  origin: 'https://www.find-me.website'
 }));
 
 app.use(bodyParser.json());
