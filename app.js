@@ -12,10 +12,16 @@ const app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-app.use(cors({
-  credentials: true,
-  origin: 'https://www.find-me.website'
-}));
+app.use(
+  cors({
+    credentials: true,
+    origin: `${
+      process.env.NODE_ENV === 'development'
+        ? 'http://localhost:3000'
+        : 'https://www.find-me.website'
+    }`
+  })
+);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));

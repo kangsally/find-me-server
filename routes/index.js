@@ -6,6 +6,7 @@ const withAuth = require('../middleware');
 const { getFacilityLocation } = require('../api');
 
 router.get('/', (req, res, next) => {
+  console.log(process.env.NODE_ENV);
   res.render('index', { title: 'find-me-server' });
 });
 
@@ -55,7 +56,7 @@ router.post('/login', (req, res) => {
         } else {
           const payload = { id };
           const token = jwt.sign(payload, process.env.SECRETKEY, {
-            expiresIn: '5m'
+            expiresIn: '15m'
           });
           res
             .cookie('token', token, { httpOnly: true })
