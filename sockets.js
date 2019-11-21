@@ -1,16 +1,31 @@
 const { getDistance } = require('./utils');
 const uuidv4 = require('uuid/v4');
+const {
+  CONNECTION,
+  USER_INFO,
+  USER_LOCATION,
+  HIDE_DATA,
+  SEEK_DATA,
+  NOTICE,
+  MESSAGE,
+  SEEK_FINISH,
+  HIDE_FINISH,
+  START,
+  END,
+  DISCONNECT,
+  DISCONNECTED
+} = require('./events');
 
 module.exports = server => {
   const io = require('socket.io')(server);
-  io.set('heartbeat interval', 100000);
-  io.set('heartbeat timeout', 100000);
+  io.set('heartbeat interval', 2000);
+  io.set('heartbeat timeout', 10000);
 
   const users = {};
   const userWaitingList = [];
   const roomList = {};
 
-  io.on('connection', socket => {
+  io.on(CONNECTION, socket => {
     const user = {
       socketId: socket.id,
       id: null,
@@ -19,10 +34,10 @@ module.exports = server => {
     };
     users[socket.id] = socket;
     userWaitingList.push(user);
-    socket.on('userInfo', info => {
+    socket.on(USER_INFO, info => {
       user.id = info.id;
     });
-    socket.on('userLocation', loaction => {
+    socket.on(USER_LOCATION, loaction => {
       user.lng = loaction.lng;
       user.lat = loaction.lat;
 
@@ -47,7 +62,7 @@ module.exports = server => {
           roomList[socket.id] = roomId;
           roomList[partner.socketId] = roomId;
 
-          io.sockets.in(roomId).emit('start', {
+          io.sockets.in(roomId).emit(START, {
             hide: user.id,
             seek: partner.id
           });
@@ -55,47 +70,47 @@ module.exports = server => {
       }
     });
 
-    socket.on('hideData', data => {
-      socket.broadcast.to(roomList[socket.id]).emit('hideData', {
+    socket.on(HIDE_DATA, data => {
+      socket.broadcast.to(roomList[socket.id]).emit(HIDE_DATA, {
         photo: data.photo,
         location: data.location
       });
     });
 
-    socket.on('seekData', data => {
-      socket.broadcast.to(roomList[socket.id]).emit('seekData', {
+    socket.on(SEEK_DATA, data => {
+      socket.broadcast.to(roomList[socket.id]).emit(SEEK_DATA, {
         location: data
       });
     });
 
-    socket.on('notice', data => {
+    socket.on(NOTICE, () => {
       const endTime = new Date().getTime() + 10 * 60000;
-      io.sockets.in(roomList[socket.id]).emit('notice', {
+      io.sockets.in(roomList[socket.id]).emit(NOTICE, {
         time: endTime
       });
     });
 
-    socket.on('message', data => {
-      socket.broadcast.to(roomList[socket.id]).emit('message', {
+    socket.on(MESSAGE, data => {
+      socket.broadcast.to(roomList[socket.id]).emit(MESSAGE, {
         message: data.message
       });
     });
 
-    socket.on('seekFinish', ({ result, finishMessage }) => {
+    socket.on(SEEK_FINISH, ({ result, finishMessage }) => {
       if (result === 'success') {
-        io.sockets.in(roomList[socket.id]).emit('seekFinish', {
+        io.sockets.in(roomList[socket.id]).emit(SEEK_FINISH, {
           result: 'success',
           finishMessage: finishMessage
         });
       }
       if (result === 'timeover') {
-        io.sockets.in(roomList[socket.id]).emit('seekFinish', {
+        io.sockets.in(roomList[socket.id]).emit(SEEK_FINISH, {
           result: 'timeover',
           finishMessage: finishMessage
         });
       }
       if (result === 'giveup') {
-        io.sockets.in(roomList[socket.id]).emit('seekFinish', {
+        io.sockets.in(roomList[socket.id]).emit(SEEK_FINISH, {
           result: 'giveup',
           finishMessage: finishMessage
         });
@@ -104,9 +119,9 @@ module.exports = server => {
       delete roomList[socket.id];
     });
 
-    socket.on('hideFinish', ({ result, finishMessage }) => {
+    socket.on(HIDE_FINISH, ({ result, finishMessage }) => {
       if (result === 'noPhoto') {
-        io.sockets.in(roomList[socket.id]).emit('hideFinish', {
+        io.sockets.in(roomList[socket.id]).emit(HIDE_FINISH, {
           result: 'noPhoto',
           finishMessage: finishMessage
         });
@@ -115,7 +130,7 @@ module.exports = server => {
       delete roomList[socket.id];
     });
 
-    socket.on('end', () => {
+    socket.on(END, () => {
       if (!socket.adapter.rooms[roomList[socket.id]]) {
         return;
       }
@@ -123,13 +138,13 @@ module.exports = server => {
       delete roomList[socket.id];
     });
 
-    socket.on('disconnect', () => {
+    socket.on(DISCONNECT, () => {
       if (!socket.adapter.rooms[roomList[socket.id]]) {
         return;
       }
       if (socket.adapter.rooms[roomList[socket.id]]) {
         socket.leave(roomList[socket.id]);
-        socket.broadcast.to(roomList[socket.id]).emit('disconnected', {
+        socket.broadcast.to(roomList[socket.id]).emit(DISCONNECTED, {
           result: 'disconnected',
           finishMessage: '상대방의 연결이 끊겼습니다.'
         });

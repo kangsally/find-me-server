@@ -6,7 +6,6 @@ const withAuth = require('../middleware');
 const { getFacilityLocation } = require('../api');
 
 router.get('/', (req, res, next) => {
-  console.log(process.env.NODE_ENV);
   res.render('index', { title: 'find-me-server' });
 });
 
