@@ -40,17 +40,14 @@ module.exports = server => {
     socket.on(USER_LOCATION, loaction => {
       user.lng = loaction.lng;
       user.lat = loaction.lat;
-      console.log(userWaitingList);
-      // console.log(Object.keys(users));
+
       if (userWaitingList.indexOf(user) !== -1 && user.id) {
         const partner = userWaitingList.find(partner => {
-          console.log(
-            getDistance(user.lat, user.lng, partner.lat, partner.lng)
-          );
           return (
             getDistance(user.lat, user.lng, partner.lat, partner.lng) < 500 &&
             user !== partner &&
-            partner.id
+            partner.id &&
+            user.id !== partner.id
           );
         });
 
