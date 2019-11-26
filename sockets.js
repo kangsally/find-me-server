@@ -40,9 +40,13 @@ module.exports = server => {
     socket.on(USER_LOCATION, loaction => {
       user.lng = loaction.lng;
       user.lat = loaction.lat;
-
+      console.log(userWaitingList);
+      // console.log(Object.keys(users));
       if (userWaitingList.indexOf(user) !== -1 && user.id) {
         const partner = userWaitingList.find(partner => {
+          console.log(
+            getDistance(user.lat, user.lng, partner.lat, partner.lng)
+          );
           return (
             getDistance(user.lat, user.lng, partner.lat, partner.lng) < 500 &&
             user !== partner &&
@@ -117,6 +121,7 @@ module.exports = server => {
       }
       socket.leave(roomList[socket.id]);
       delete roomList[socket.id];
+      delete users[socket.id];
     });
 
     socket.on(HIDE_FINISH, ({ result, finishMessage }) => {
@@ -128,6 +133,7 @@ module.exports = server => {
       }
       socket.leave(roomList[socket.id]);
       delete roomList[socket.id];
+      delete users[socket.id];
     });
 
     socket.on(END, () => {
@@ -136,12 +142,10 @@ module.exports = server => {
       }
       socket.leave(roomList[socket.id]);
       delete roomList[socket.id];
+      delete users[socket.id];
     });
 
     socket.on(DISCONNECT, () => {
-      if (!socket.adapter.rooms[roomList[socket.id]]) {
-        return;
-      }
       if (socket.adapter.rooms[roomList[socket.id]]) {
         socket.leave(roomList[socket.id]);
         socket.broadcast.to(roomList[socket.id]).emit(DISCONNECTED, {

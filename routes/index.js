@@ -11,7 +11,6 @@ router.get('/', (req, res, next) => {
 
 router.post('/join', async (req, res) => {
   const { id, password } = req.body;
-  const point = 10000;
   await User.findOne({ id: id }).exec(async (err, userData) => {
     if (err) {
       return res.status(500).send('Server error! Please try again.');
@@ -19,7 +18,7 @@ router.post('/join', async (req, res) => {
     if (userData) {
       return res.status(200).send('Already existed id');
     }
-    const user = new User({ id, password, point });
+    const user = new User({ id, password });
     await user.save(err => {
       if (err) {
         res.status(500).send('Server error! Please try again.');
@@ -55,14 +54,13 @@ router.post('/login', (req, res) => {
         } else {
           const payload = { id };
           const token = jwt.sign(payload, process.env.SECRETKEY, {
-            expiresIn: '15m'
+            expiresIn: '30m'
           });
           res
             .cookie('token', token, { httpOnly: true })
             .status(200)
             .json({
               id: user.id,
-              point: user.point
             });
         }
       });

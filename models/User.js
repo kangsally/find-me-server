@@ -15,10 +15,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  point: {
-    type: Number,
-    required: true
-  }
 });
 
 userSchema.pre('save', function(next) {
