@@ -1,0 +1,13 @@
+exports.CONNECTION = 'connection';
+exports.USER_INFO = 'userInfo';
+exports.USER_LOCATION = 'userLocation';
+exports.HIDE_DATA = 'hideData';
+exports.SEEK_DATA = 'seekData';
+exports.NOTICE = 'notice';
+exports.MESSAGE = 'message';
+exports.SEEK_FINISH = 'seekFinish';
+exports.HIDE_FINISH = 'hideFinish';
+exports.START = 'start';
+exports.END = 'end';
+exports.DISCONNECT = 'disconnect';
+exports.DISCONNECTED = 'disconnected';
