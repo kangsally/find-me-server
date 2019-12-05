@@ -1,11 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
-/*
 
-  TODO: Fill in the model specification
-
- */
 const userSchema = new mongoose.Schema({
   id: {
     type: String,
@@ -18,10 +14,8 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.pre('save', function(next) {
-  // Check if document is new or a new password has been set
-//   console.log(this.isNew, this.isModified('password'));
+
   if (this.isNew || this.isModified('password')) {
-    // Saving reference to this because of changing scopes
     const document = this;
     bcrypt.hash(document.password, saltRounds, function(err, hashedPassword) {
       if (err) {
