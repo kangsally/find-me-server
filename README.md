@@ -6,8 +6,6 @@
 
 ## Preview
 
-- 배포링크: https://www.find-me.website/
-
 - Screen shot
 
    -회원가입
